@@ -1,0 +1,269 @@
+---
+title: "Homework 2"
+author: "Advik Ravichandran"
+date: "January 28th, 2025`"
+output:
+  pdf_document:
+    toc: true
+    toc_depth: '3'
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    number_sections: false
+    theme: journal
+---
+
+# Question 1
+
+```{r echo = FALSE, warning = FALSE, results = 'hide'}
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(knitr)
+```
+
+```{r echo = FALSE, warning = FALSE}
+profs <- read.csv("profs.csv")
+graph1 <- ggplot(profs)
+graph1 + geom_histogram(aes(x = eval)) + 
+  labs(
+    x = "Course Evaluation Scores",
+    y = "Count",
+    title = "Distribution of Course Evaluation Scores"
+  )
+# median(profs$eval)
+# mean(profs$eval)
+# range(profs$eval)
+```
+
+This graph is skewed to the right and the median score is 4. The skewing to the right will cause the mean to be less than the median, which is the case in this graph.
+
+```{r echo = FALSE, warning = FALSE}
+# Boxplot by Native English Speaker Status
+graph2 <- ggplot(profs)
+graph2 + geom_boxplot(aes(x = native, y = eval)) + 
+  labs(
+    x = "Native English Speaker",
+    y = "Course Evaluation Scores", 
+    title = "Distribution of Course Evaluation Scores Grouped by Native English Speaker Status"
+  )
+# Finding medians
+medians <- profs %>%
+  group_by(native) %>%
+  summarise(median = median(eval))
+# medians
+# 3.6 No 4 Yes
+```
+
+The median of the course evaluation scores for native English speakers is higher at 4 compared to the non-native English speakers with a median of 3.6. However, the native English speakers have outliers, while the non-native English speakers do not.
+
+```{r echo = FALSE, warning = FALSE}
+graph3 <- ggplot(profs)
+graph3 + geom_histogram(aes(x = eval, fill = gender)) +
+  facet_wrap(~gender, nrow = 2) +
+    labs(
+    x = "Course Evaluation Scores", 
+    y = "Count",
+    title = "Course Evaluation Scores Based off of Professors' Gender"
+  )
+# Finding Medians
+medians <- profs %>%
+  group_by(gender) %>%
+  summarise(median = median(eval))
+# medians
+# 3.90 F
+# 4.15 M
+```
+
+Both plots are generally skewed to the left. However, the median score for men professors were higher at 4.15 compared to the women's median score of 3.90.
+
+```{r echo = FALSE, warning = FALSE}
+graph4 <- ggplot(profs)
+graph4 + geom_point(aes(x = beauty, y = eval)) + 
+  labs(
+    x = "Physical Attractiveness",
+    y = "Course Evaluation Scores",
+    title = "Professors' Physical Attractiveness Versus Course Evaluation Scores"
+  )
+# cor(profs$beauty, profs$eval)
+# 0.1890391
+```
+
+In the scatterplot, there is a small, positive correlation, 0.1890, between professor's physical attractiveness and course evaluation scores.
+
+# Question 2
+
+```{r echo = FALSE, warning = FALSE}
+bikeshare <- read.csv("bikeshare.csv")
+
+# Part A
+total_rental <- 
+  bikeshare %>%
+  group_by(hr) %>%
+  summarize(avg_total = mean(total))
+
+ggplot(total_rental) + geom_line(aes(x = hr, y = avg_total)) + 
+  labs(
+    x = "Hour of the Day",
+    y = "Average Number of Bike Rentals",
+    title = "Average Hourly Bike Rentals"
+  )
+
+```
+
+This line graph shows the average hourly bike rentals, the y-axis, across all hours of the day, the x-axis. The graph shows a sharp increase at two times, around 8AM and 5-6PM, which could correspond with typical office commute times on a workday. Bike rentals align with daily commuting schedules, as seen on the graph.
+
+```{r echo = FALSE, warning = FALSE}
+# Part B
+rental_workday = 
+  bikeshare %>%
+  group_by(hr, workingday) %>%
+  mutate(workingday = factor(workingday, levels = c(0, 1), labels = c("Weekend", "Workday"))) %>%
+  summarize(total_avg = mean(total))
+
+ggplot(rental_workday) + geom_line(aes(x = hr, y = total_avg)) +
+  facet_wrap(~workingday) + 
+  labs(
+    x = "Hours",
+    y = "Average Number of Bike Rentals",
+    title = "Average Number of Bike Rentals Across All Hours by Working Day Status"
+  )
+
+```
+
+The graph above illustrates how the number of bike rentals change in relation to time when comparing if it is a workday or weekend. The weekend shows that there is a gradual increase in rentals in the morning and then a gradual decline towards the night. However, the workday has peaks that correspond to commuting hours, 8AM and 5-6PM. This shows that on weekdays, demand is driven by work commuting while weekends are more leisurely activities.
+
+```{r echo = FALSE, warning = FALSE}
+# Part C
+ridership = 
+  bikeshare %>%
+  filter(hr == 9) %>%
+  group_by(hr, weathersit, workingday) %>%
+  mutate(workingday = factor(workingday, levels = c(0, 1), labels = c("Weekend", "Workday"))) %>%
+  summarize(total_avg = mean(total, na.rm = TRUE)) 
+ggplot(ridership) + geom_col(aes(x = weathersit, y = total_avg)) + 
+  facet_wrap(~workingday) + 
+  labs(
+    x = "Weather Situation",
+    y = "Average Number of Bike Rentals",
+    title = "Average Number of Bike Rentals Based off of Weather Situation"
+  )
+```
+
+This faceted bar plot compares the average bike rentals at 9AM across different weather conditions and based off of the type of day, such as weekend and weekday. Workdays show that despite different weather situations, ridership still remains high, except for 3. On the weekends, there is a drop with each weather situation, going from 1 to 2 to 3, suggesting that it may play a part on recreational ridership. This graph indicates that weather conditions have a stronger impact on non-workdays than workdays.
+
+# Question 3
+
+```{r echo = FALSE, warning = FALSE}
+capmetro_UT <- read.csv("capmetro_UT.csv")
+# Recode the categorical variables in sensible, rather than alphabetical, order
+capmetro_UT = mutate(capmetro_UT,
+  day_of_week = factor(day_of_week,
+  levels=c("Mon", "Tue", "Wed","Thu", "Fri", "Sat", "Sun")),
+  month = factor(month,
+  levels=c("Sep", "Oct","Nov")))
+boardings =
+  capmetro_UT %>%
+  group_by(hour_of_day, day_of_week, month) %>%
+  summarize(avg_boardings = mean(boarding))
+ggplot(boardings) + geom_line(aes(x = hour_of_day, y = avg_boardings, color = month)) + 
+  facet_wrap(~ day_of_week) + 
+  labs(
+    x = "Hour of the Day",
+    y = "Average Number of Boardings",
+    title = "Average Number of Boardings Across Hours of the Day Separated by Day of the Week and Coded by Month"
+  ) + 
+  theme(
+    plot.title = element_text(size = 9)
+  )
+
+
+```
+
+This faceted line graph illustrates the average number of boardings across each hour of the day and color coded by month. The number of boardings are consistent on weekdays, with it being busier as the day goes on, peaking in the late afternoon. On weekends, it is also consistent, with minimal change throughout the day. The low boardings on Mondays in September can be explained by students getting used to their routine, so they are less likely to use the bus and rather stay on campus. The low boardings in November on Wednesday, Thursday, and Friday can be explained by the Thanksgiving break, which many students leave to go back to their hometown, so the bus will not be as busy.
+
+```{r echo = FALSE, warning = FALSE}
+# PART B
+ggplot(capmetro_UT) + geom_point(aes(x = temperature, y = boarding, color = weekend)) +
+  facet_wrap(~ hour_of_day) + 
+  labs(
+    x = "Temperature",
+    y = "Average Number of Boardings",
+    title = "Temperature versus Average Number of Boardings Faceted by Day and Coded by Day Status"
+  ) + 
+  theme(
+    plot.title = element_text(size = 9)
+  )
+```
+
+As show in the faceted scatterplots, there is no relationship between temperature and the number of boardings. None of the graphs above show a noticeable correlation between the two variables. Also, when we hold hour of day and day status, temperature does not seem to have a noticeable effect on the number of UT students riding the bus.
+
+# Question 4
+
+```{r echo = FALSE, warning = FALSE}
+billboard <- read.csv("billboard.csv")
+# Part A
+top_ten = 
+  billboard %>%
+  group_by(performer, song) %>%
+  summarize(count = weeks_on_chart, .groups = "drop") %>%
+  arrange(desc(count)) %>%
+  distinct(song, .keep_all = TRUE) %>%
+  rename(Performer = performer, Song = song, Count = count) %>%
+  head(10)
+cat("Top Ten Most Popular Songs")
+kable(top_ten)
+
+```
+
+This table shows the top 10 most popular songs since 1958, measured by the total number of weeks that a song spent on the Billboard Top 100.
+
+```{r echo = FALSE, warning = FALSE}
+
+# Part B
+mus_div <-
+  billboard %>%
+  filter(year != 1958, year!= 2021) %>%
+  group_by(year) %>%
+  summarize(unique_songs = n_distinct(song))
+
+ggplot(mus_div) + geom_line(aes(x = year, y = unique_songs)) + 
+  labs(
+    x = "Year",
+    y = "Number of Unique Songs",
+    title = "Number of Unique Songs Across the Years"
+  )
+
+
+
+  
+```
+
+The number of unique songs start off high, but then gradually decrease until the 2000s, which it then begins to increase again. There are some spikes between the broad trends, which could be explained by new artists or songs.
+
+```{r echo = FALSE, warning = FALSE}
+# Part C
+# Ten week hit
+ten_week_hits <-
+  billboard %>%
+  group_by(song, performer) %>%
+  summarize(weeks_on_chart = n(), .groups = "drop") %>%
+  filter(weeks_on_chart >= 10)
+
+art_hits <-
+  ten_week_hits %>%
+  group_by(performer) %>%
+  summarize(ten_week_hits = n(), .groups = 'drop') %>%
+  filter(ten_week_hits >= 30)
+
+ggplot(art_hits, aes(x = reorder(performer, ten_week_hits), y = ten_week_hits)) + geom_bar(stat = "identity") + 
+  coord_flip() + 
+  labs(
+    x = "Performer",
+    y = "Number of Ten Week Hits",
+    title = "Performers and Their Number of Ten Week Hits"
+  )
+```
+
+Elton John has the most ten week hits with more than 50. Madonna follows him, and the rest are closely behind them. However, Elton John has a noticeable difference between Madonna, around 8 songs, while the others differ by only a couple of songs.

@@ -1,18 +1,22 @@
 ---
 title: "Homework 2"
 author: "Advik Ravichandran"
-date: "January 28th, 2025`"
+date: "January 28th, 2025"
 output:
   pdf_document:
-    toc: true
+    toc: false
     toc_depth: '3'
   html_document:
-    toc: true
-    toc_float: true
+    toc: false
+    toc_float: false
     toc_depth: 3
     number_sections: false
     theme: journal
 ---
+
+**UTEID:** asr3897
+
+**GitHub:** <https://github.com/advikr/SDS315-HW-2>
 
 # Question 1
 
@@ -37,7 +41,7 @@ graph1 + geom_histogram(aes(x = eval)) +
 # range(profs$eval)
 ```
 
-This graph is skewed to the right and the median score is 4. The skewing to the right will cause the mean to be less than the median, which is the case in this graph.
+This graph is skewed to the left and the median score is 4. The skewing to the left will cause the mean to be less than the median, which is the case in this graph.
 
 ```{r echo = FALSE, warning = FALSE}
 # Boxplot by Native English Speaker Status
@@ -47,6 +51,10 @@ graph2 + geom_boxplot(aes(x = native, y = eval)) +
     x = "Native English Speaker",
     y = "Course Evaluation Scores", 
     title = "Distribution of Course Evaluation Scores Grouped by Native English Speaker Status"
+  ) +
+  theme(
+      plot.title = element_text(size = 12)
+
   )
 # Finding medians
 medians <- profs %>%
@@ -190,7 +198,7 @@ ggplot(capmetro_UT) + geom_point(aes(x = temperature, y = boarding, color = week
   labs(
     x = "Temperature",
     y = "Average Number of Boardings",
-    title = "Temperature versus Average Number of Boardings Faceted by Day and Coded by Day Status"
+    title = "Temperature Versus Average Number of Boardings Faceted by Day and Coded by Day Status"
   ) + 
   theme(
     plot.title = element_text(size = 9)
